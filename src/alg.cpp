@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <string>
 
-int IntegerPower(int base, int exponent) {
+static int IntegerPower(int base, int exponent) {
     if (exponent < 0) {
         throw std::runtime_error("Negative exponent not supported");
     }
@@ -22,7 +22,7 @@ int IntegerPower(int base, int exponent) {
     return result;
 }
 
-int ExtractNumber(std::size_t* pos, const std::string& str) {
+static int ExtractNumber(std::size_t* pos, const std::string& str) {
     int value = 0;
     while (*pos < str.size() && std::isdigit(str[*pos])) {
         value = value * 10 + (str[*pos] - '0');
@@ -32,7 +32,7 @@ int ExtractNumber(std::size_t* pos, const std::string& str) {
     return value;
 }
 
-int GetOperatorPriority(char op) {
+static int GetOperatorPriority(char op) {
     switch (op) {
         case '+':
         case '-':
@@ -47,11 +47,11 @@ int GetOperatorPriority(char op) {
     }
 }
 
-bool IsRightAssociative(char op) {
+static bool IsRightAssociative(char op) {
     return op == '^';
 }
 
-std::string InfixToPostfix(const std::string& inf) {
+std::string infx2pstfx(const std::string& inf) {
     std::ostringstream buffer;
     std::stack<char> st;
 
@@ -117,7 +117,7 @@ std::string InfixToPostfix(const std::string& inf) {
     return result;
 }
 
-int EvaluatePostfix(const std::string& postfix) {
+int eval(const std::string& postfix) {
     std::stack<int> st;
 
     for (std::size_t pos = 0; pos < postfix.size(); ++pos) {
