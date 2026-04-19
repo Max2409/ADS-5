@@ -1,39 +1,46 @@
 // Copyright 2025 NNTU-CS
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <stack>
 #include <cctype>
 #include <cmath>
+#include <iostream>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <stdexcept>
 
-int extractNumber(size_t& pos, const std::string& str) {
+int ExtractNumber(std::size_t* pos, const std::string& str) {
     int value = 0;
-    while (pos < str.size() && std::isdigit(str[pos])) {
-        value = value * 10 + (str[pos] - '0');
-        ++pos;
+    while (*pos < str.size() && std::isdigit(str[*pos])) {
+        value = value * 10 + (str[*pos] - '0');
+        ++(*pos);
     }
-    --pos;
+    --(*pos);
     return value;
 }
 
-int getOperatorPriority(char op) {
+int GetOperatorPriority(char op) {
     switch (op) {
-        case '+': case '-': return 1;
-        case '*': case '/': return 2;
-        case '^':           return 3;
-        default:            return -1;
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        case '^':
+            return 3;
+        default:
+            return -1;
     }
 }
 
-bool isRightAssociative(char op) {
+bool IsRightAssociative(char op) {
     return op == '^';
 }
 
-std::string infx2pstfx(const std::string& inf) {
+std::string InfixToPostfix(const std::string& inf) {
     std::ostringstream buffer;
     std::stack<char> st;
 
-    for (size_t idx = 0; idx < inf.size(); ++idx) {
+    for (std::size_t idx = 0; idx < inf.size(); ++idx) {
         char symbol = inf[idx];
 
         if (std::isspace(symbol)) {
@@ -41,7 +48,7 @@ std::string infx2pstfx(const std::string& inf) {
         }
 
         if (std::isdigit(symbol)) {
-            int number = extractNumber(idx, inf);
+            int number = ExtractNumber(&idx, inf);
             buffer << ' ' << number;
             continue;
         }
@@ -62,18 +69,18 @@ std::string infx2pstfx(const std::string& inf) {
             continue;
         }
 
-        int priority = getOperatorPriority(symbol);
+        int priority = GetOperatorPriority(symbol);
         if (priority == -1) {
             continue;
         }
 
         while (!st.empty() && st.top() != '(') {
-            char topOp = st.top();
-            int topPriority = getOperatorPriority(topOp);
+            char top_op = st.top();
+            int top_priority = GetOperatorPriority(top_op);
 
-            if ( (!isRightAssociative(symbol) && topPriority >= priority) ||
-                 ( isRightAssociative(symbol) && topPriority > priority) ) {
-                buffer << ' ' << topOp;
+            if ((!IsRightAssociative(symbol) && top_priority >= priority) ||
+                (IsRightAssociative(symbol) && top_priority > priority)) {
+                buffer << ' ' << top_op;
                 st.pop();
             } else {
                 break;
@@ -95,10 +102,10 @@ std::string infx2pstfx(const std::string& inf) {
     return result;
 }
 
-int eval(const std::string& postfix) {
+int EvaluatePostfix(const std::string& postfix) {
     std::stack<int> st;
 
-    for (size_t pos = 0; pos < postfix.size(); ++pos) {
+    for (std::size_t pos = 0; pos < postfix.size(); ++pos) {
         char current = postfix[pos];
 
         if (std::isspace(current)) {
@@ -106,7 +113,7 @@ int eval(const std::string& postfix) {
         }
 
         if (std::isdigit(current)) {
-            int number = extractNumber(pos, postfix);
+            int number = ExtractNumber(&pos, postfix);
             st.push(number);
             continue;
         }
@@ -115,23 +122,34 @@ int eval(const std::string& postfix) {
             throw std::runtime_error("Not enough operands");
         }
 
-        int b = st.top(); st.pop();
-        int a = st.top(); st.pop();
+        int b = st.top();
+        st.pop();
+        int a = st.top();
+        st.pop();
         int result = 0;
 
         switch (current) {
-            case '+': result = a + b; break;
-            case '-': result = a - b; break;
-            case '*': result = a * b; break;
-            case '/': 
-                if (b == 0) throw std::runtime_error("Division by zero");
-                result = a / b; 
+            case '+':
+                result = a + b;
                 break;
-            case '^': 
+            case '-':
+                result = a - b;
+                break;
+            case '*':
+                result = a * b;
+                break;
+            case '/':
+                if (b == 0) {
+                    throw std::runtime_error("Division by zero");
+                }
+                result = a / b;
+                break;
+            case '^':
                 result = static_cast<int>(std::pow(a, b));
                 break;
             default:
-                throw std::runtime_error(std::string("Unknown operator: ") + current);
+                throw std::runtime_error(std::string("Unknown operator: ") +
+                                         current);
         }
         st.push(result);
     }
