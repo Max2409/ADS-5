@@ -1,11 +1,26 @@
 // Copyright 2025 NNTU-CS
 #include <cctype>
-#include <cmath>
+#include <cstddef>
 #include <iostream>
 #include <sstream>
 #include <stack>
-#include <string>
 #include <stdexcept>
+#include <string>
+
+int IntegerPower(int base, int exponent) {
+    if (exponent < 0) {
+        throw std::runtime_error("Negative exponent not supported");
+    }
+    int result = 1;
+    while (exponent > 0) {
+        if (exponent & 1) {
+            result *= base;
+        }
+        base *= base;
+        exponent >>= 1;
+    }
+    return result;
+}
 
 int ExtractNumber(std::size_t* pos, const std::string& str) {
     int value = 0;
@@ -145,7 +160,7 @@ int EvaluatePostfix(const std::string& postfix) {
                 result = a / b;
                 break;
             case '^':
-                result = static_cast<int>(std::pow(a, b));
+                result = IntegerPower(a, b);
                 break;
             default:
                 throw std::runtime_error(std::string("Unknown operator: ") +
